@@ -29,7 +29,7 @@ class Encrypter
   end
 
   def encrypt( s )
-    return process(s) { |c, key| c  + 1 }
+    return process(s) { |c, key| key.ord  + 1 }
   end
 
   def decrypt( msg )
