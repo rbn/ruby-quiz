@@ -7,7 +7,7 @@ class Encrypter
   def sanitize( s )
     s = s.upcase
     s = s.gsub(/[^A-Z]/, '')
-    s = s + 'X' * ( (5 - s.size % 5) % 5)
+    s = s + 'X' * ((5 - s.size % 5) % 5)
     out = ''
     (s.length / 5).times {|i| out << s[i*5, 5] << ' '}
     return out.strip!
@@ -94,6 +94,12 @@ class Deck
     third_cut = do_third ? 
                   @deck[bottom_joker + 1, @deck.length - bottom_joker + 1] :
                   []
+    #puts
+    #puts "first cut: #{first_cut}"
+    #puts "second cut: #{second_cut}"
+    #puts "third cut: #{third_cut}" 
+    #puts
+ 
     @deck = third_cut + second_cut + first_cut
   end
   
