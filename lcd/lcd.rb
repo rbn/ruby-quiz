@@ -1,11 +1,7 @@
 require './numbers.rb'
 
 class LCD
-  def initialize ( input, scale = 2)
-    puts "initializing LCD ..."
-    puts "scale is #{scale}"
-    puts "input is #{input}"
-
+  def initialize ( input )
     # hash of input values to class names
     num_hash = { "1" => :one,
                  "2" => :two,
@@ -14,9 +10,6 @@ class LCD
     # collection of numbers - will hold corresponding
     # input values
     @nums = Numbers.new
-
-    # set scale
-    @scale = scale
 
     # convert input to array
     input_arr = input.to_s.split('')
@@ -27,11 +20,15 @@ class LCD
     end
   end
   
-  def print
-    @nums.print(@scale)
+  def print( scale = 1 )
+    @nums.print(scale)
   end
 end
 
+if ARGV.empty?
+  puts "please enter command line arguments!"
+  exit
+end
 
 until ARGV.empty? do
   temp = ARGV.shift
@@ -41,5 +38,5 @@ end
 
 scale = scale ||= 2
 
-lcd = LCD.new(input, scale)
-lcd.print
+lcd = LCD.new(input)
+lcd.print(scale)
