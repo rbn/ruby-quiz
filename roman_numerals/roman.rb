@@ -29,22 +29,14 @@ class Roman
     # base ten numbers that start with a 4 or 9 require numeral subtraction
     @subtractors = [ 4, 9 ] 
 
-    # convert input to roman numeral
-    convert(v)
-  end
-
-  # converts an integer to a roman numeral, or
-  # if parameter is a roman numeral, converts to integer
-  def convert( v )
+    # assign values to variables based on input type
     if v.kind_of?(String) 
-      @numeral = v 
-      @number = numberify(v)
+      puts 'numeral to int not implemented!'
     else
       @numeral = convert_to_roman(v) 
       @number = v
     end
   end
-
 
   def numeral
     @numeral 
@@ -56,43 +48,11 @@ class Roman
 
   private
    
-  def romanify(i)
-   # store original number as ORIG                                           # => 9
-   orig = i
-   
-   # store roman numeral as ROMAN (initialize as empty string)               # => ''
-   roman = ''
-   
-   # store multiplier as MULT = 10**( (no. columns right of 0) - 1 )         # => 1
-   mult = 10**(i.to_s.length - 1)
-   
-   # store current floor as FLOOR = ORIG >= 5 * MULT ? 5 * MULT : MULT       # => 5
-   floor = orig >= ( 5 * mult ) ? 
-                     ( 5 * mult )  : 
-                     mult
-   
-   # repeater = ORIG / FLOOR                                                 # => 1 
-   repeater = orig / floor
-   
-   # ROMAN += @numerals.invert[FLOOR]                                        # => 'V'
-   roman += @numerals.invert[floor] * repeater 
-   
-   # store REMAINDER = ORIG - FLOOR                                          # => '4' 
-   remainder = orig - ( floor * repeater )
-   
-   # if REMAINDER, append romanify(remainder)                                # => 'VIIII'
-   if remainder > 0
-    roman += romanify(remainder)
-   end
-   
-   roman
-  end
-
   def convert_to_roman(n)
     roman = ''
     s = n.to_s                                # => '1493'
     s = s.split('').reverse                   # => '[ 3, 9, 4, 1 ]'
-    s.each_with_index do | value, index |
+    s.each_with_index do | value, index |      # => 3, 90, 400, 1000
       power = index
       base_ten = ( value.to_i * ( 10 ** power ) ).to_s  
       roman.insert( 0, get_base_ten_numeral( base_ten ) )
@@ -108,7 +68,48 @@ class Roman
     # if 4 or 9, subtract from upper bound 
     return @subtractors.include?(left.to_i) ?
              subtract(n) : 
-             romanify(n)
+             create(n)
+  end
+
+  # perform roman numeral subtraction
+  def subtract(n)
+    s = n.to_s
+    power = s.length - 1
+    mid = 5 * ( 10 ** power )
+    return n > mid ?
+             lower(n) + upper(n) :
+             lower(n) + mid(n)
+  end
+
+  # creates a roman numeral that does not require subtraction
+  def create(n)
+   # store original                                                          # => 7 
+   s = n.to_s 
+   
+   # init numeral                                                            # => ''
+   roman = ''
+   
+   # calculate multiplier                                                    # => 1
+   mult = 10 ** (s.length - 1)
+   
+   # calculate floor value (numeric value of closest lower-bound numeral)    # => 5
+   floor = n >= ( 5 * mult ) ? 
+             ( 5 * mult )  : 
+             mult
+   
+   # calculate repeater value                                                # => 1 
+   repeater = n / floor
+   
+   # get roman numeral and repeat as necessary                               # => 'V'
+   roman += @numerals.invert[floor] * repeater 
+   
+   # calculate remainder                                                     # => '2' 
+   remainder = n - ( floor * repeater )
+   
+   # if REMAINDER, append romanify(remainder)                                # => 'VII'
+   roman += romanify(remainder) if remainder > 0
+   
+   roman
   end
 
   def upper(n)
@@ -132,18 +133,11 @@ class Roman
     return @numerals.invert[lower]
   end
 
-  def subtract(n)
-    s = n.to_s
-    power = s.length - 1
-    mid = 5 * ( 10 ** power )
-    return n > mid ?
-             lower(n) + upper(n) :
-             lower(n) + mid(n)
-  end
 end
 
 # OUTPUT
-r = Roman.new(1493)
-puts "1493 converts to #{r.numeral}"
-
+r = Roman.new(3393)
+puts "#{r.number} converts to #{r.numeral}"
+r = Roman.new('VII')
+puts "VII converts to #{r.number}"
 
