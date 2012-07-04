@@ -1,16 +1,3 @@
-# 
-# 1  = I
-# 2  = II
-# 3  = III
-# 4  = IV
-# 5  = V
-# 6  = VI
-# 7  = VII
-# 8  = VIII
-# 9  = IX
-# 10 = X
-#
-
 class Roman
   attr_accessor :numerals
 
@@ -47,96 +34,93 @@ class Roman
   end
 
   private
-   
+
+  # convert an integer to a roman numeral 
   def convert_to_roman(n)
     roman = ''
-    s = n.to_s                                # => '1493'
-    s = s.split('').reverse                   # => '[ 3, 9, 4, 1 ]'
-    s.each_with_index do | value, index |      # => 3, 90, 400, 1000
+    # convert to string and reverse order
+    s = n.to_s.split('').reverse                         # => '[ 3, 9, 4, 1 ]'
+    # iterate  
+    s.each_with_index do | value, index |           
+      # convert back to number
+      number = value.to_i
+      # calculate power
       power = index
-      base_ten = ( value.to_i * ( 10 ** power ) ).to_s  
-      roman.insert( 0, get_base_ten_numeral( base_ten ) )
+      # multiply number by a calculated factor of 10 
+      factor = number * ( 10 ** power )     # => 3, 90, 400, 1000    
+      # translate power 10 number
+      power_ten_numeral = translate_power_ten( factor )  
+      # prepend to roman numeral string
+      roman.insert( 0, power_ten_numeral )
     end
     roman
   end
 
-  # given a number base 10, return the corresponding numeral
-  def get_base_ten_numeral(s)
-    n = s.to_i
-    # examine left most character
-    left = s[0,1]
-    # if 4 or 9, subtract from upper bound 
-    return @subtractors.include?(left.to_i) ?
-             subtract(n) : 
-             create(n)
+  # given a number raised to the power of 10, return the corresponding numeral
+  def translate_power_ten(n)
+    # determine if subtraction is necessary by looking at left-most digit
+    left = n.to_s[0,1].to_i
+    return translate_by_subtraction(n) if @subtractors.include?(left) 
+                                                                   
+    # init vars
+    roman = ''                                                                # => 9
+    lower_numeric = @numerals[lower(n)] 
+    lower_numeral = lower(n)
+
+    # calculate repeater value                                                # => 1 
+    repeats = n / lower_numeric
+
+    # repeat numeral as necessary                                             # => 'V'
+    roman += lower_numeral * repeats
+    
+    # calculate remainder                                                     # => '2' 
+    remainder = n - ( lower_numeric * repeats )
+    
+    # if REMAINDER, append romanify(remainder)                                # => 'VII'
+    roman += tranlsate(remainder) if remainder > 0
+    
+    roman
   end
 
   # perform roman numeral subtraction
-  def subtract(n)
-    s = n.to_s
-    power = s.length - 1
-    mid = 5 * ( 10 ** power )
-    return n > mid ?
-             lower(n) + upper(n) :
-             lower(n) + mid(n)
+  def translate_by_subtraction(n)
+    return subtractor(n) + upper(n)
   end
 
-  # creates a roman numeral that does not require subtraction
-  def create(n)
-   # store original                                                          # => 7 
-   s = n.to_s 
-   
-   # init numeral                                                            # => ''
-   roman = ''
-   
-   # calculate multiplier                                                    # => 1
-   mult = 10 ** (s.length - 1)
-   
-   # calculate floor value (numeric value of closest lower-bound numeral)    # => 5
-   floor = n >= ( 5 * mult ) ? 
-             ( 5 * mult )  : 
-             mult
-   
-   # calculate repeater value                                                # => 1 
-   repeater = n / floor
-   
-   # get roman numeral and repeat as necessary                               # => 'V'
-   roman += @numerals.invert[floor] * repeater 
-   
-   # calculate remainder                                                     # => '2' 
-   remainder = n - ( floor * repeater )
-   
-   # if REMAINDER, append romanify(remainder)                                # => 'VII'
-   roman += romanify(remainder) if remainder > 0
-   
-   roman
-  end
-
+  # given an int, return the corresponding upper-bounding numeral
   def upper(n)
-    s = n.to_s
-    power = s.length - 1
-    upper = 10 * ( 10 ** power )
+    upper = n > @numerals[mid(n)] ? 
+              10 * ( 10 ** power(n) ) :
+              5 * ( 10 ** power(n) )
     return @numerals.invert[upper]
   end
 
+  # given an int, return the closest middle numeral
   def mid(n)
-    s = n.to_s
-    power = s.length - 1
-    mid = 5 * ( 10 ** power )
-    return @numerals.invert[mid]
+    return @numerals.invert[ 5 * ( 10 ** power(n) )]
   end
 
+  # given an int, return the corresponding lower-bound numeral
   def lower(n)
-    s = n.to_s
-    power = s.length - 1
-    lower = 1 * ( 10 ** power )
+    lower = n < @numerals[mid(n)] ? 
+              1 * ( 10 ** power(n) ) :
+              5 * ( 10 ** power(n) )
     return @numerals.invert[lower]
   end
 
+  # given an int, return the numeral required for subtraction in its power-10 interval
+  def subtractor(n)
+    return @numerals.invert[ 1 * ( 10 ** power(n) ) ]
+  end
+
+  # given an int, returns the power used in raise-to-power-10 calculations
+  def power(n)
+    n.to_s.length - 1
+  end
 end
 
 # OUTPUT
-r = Roman.new(3393)
+r = Roman.new(309)
 puts "#{r.number} converts to #{r.numeral}"
 r = Roman.new('VII')
 puts "VII converts to #{r.number}"
